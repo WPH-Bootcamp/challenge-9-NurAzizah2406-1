@@ -114,7 +114,7 @@ export default function RestaurantDetailPage() {
                 </Badge>
                 <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
                   <Star className="w-4 h-4 fill-current" />
-                  <span>{restaurant.rating.toFixed(1)}</span>
+                  <span>{restaurant.rating != null ? restaurant.rating.toFixed(1) : "N/A"}</span>
                 </div>
               </div>
               <h1 className="text-2xl md:text-4xl font-extrabold text-slate-800 tracking-tight">

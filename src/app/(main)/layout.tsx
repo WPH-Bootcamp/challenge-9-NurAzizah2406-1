@@ -1,32 +1,30 @@
 "use client";
 
 import Navbar from "@/components/shared/Navbar";
-import { UtensilsCrossed } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50">
       <Navbar />
       <main className="flex-grow flex flex-col">{children}</main>
-      <footer className="border-t border-border bg-white py-8 mt-auto">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white shadow-sm">
-              <UtensilsCrossed className="h-4 w-4" />
-            </div>
-            <span className="font-bold text-sm tracking-tight">
-              Restaurant<span className="text-orange-500">App</span>
-            </span>
+      
+      {/* Centered design system footer for non-home pages */}
+      {!isHome && (
+        <footer className="border-t border-slate-100 bg-[#FAFAFA] py-10">
+          <div className="container mx-auto px-4 text-center space-y-2 text-xs text-slate-400">
+            <p className="font-semibold text-slate-500">The ultimate Figma UI kit and design system</p>
+            <p>&copy; {new Date().getFullYear()} Web Programming Hack</p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Restaurant App. Seluruh hak cipta dilindungi.
-          </p>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }
