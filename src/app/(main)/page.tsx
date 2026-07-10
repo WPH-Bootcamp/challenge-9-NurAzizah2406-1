@@ -104,7 +104,7 @@ export default function HomePage() {
   const { data: listData, isLoading: isLoadingList } = useRestaurants(allRestaurantsParams);
 
   // Filter list data further by search query locally if API doesn't support combined search+filter easily
-  const restaurantsToShow = listData?.data.filter((resto) =>
+  const restaurantsToShow = listData?.data?.restaurants?.filter((resto) =>
     resto.name.toLowerCase().includes(query.toLowerCase())
   ) || [];
 
@@ -189,9 +189,9 @@ export default function HomePage() {
             </div>
             {isLoadingRec ? (
               <div className="flex h-40 items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-orange-500" /></div>
-            ) : recommendedData?.data && recommendedData.data.length > 0 ? (
+            ) : recommendedData?.data?.restaurants && recommendedData.data.restaurants.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {recommendedData.data.slice(0, 2).map((resto) => (
+                {recommendedData.data.restaurants.slice(0, 2).map((resto) => (
                   <RestaurantCard key={resto.id} restaurant={resto} />
                 ))}
               </div>
@@ -208,9 +208,9 @@ export default function HomePage() {
             </div>
             {isLoadingNearby ? (
               <div className="flex h-40 items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-orange-500" /></div>
-            ) : nearbyData?.data && nearbyData.data.length > 0 ? (
+            ) : nearbyData?.data?.restaurants && nearbyData.data.restaurants.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {nearbyData.data.slice(0, 2).map((resto) => (
+                {nearbyData.data.restaurants.slice(0, 2).map((resto) => (
                   <RestaurantCard key={resto.id} restaurant={resto} />
                 ))}
               </div>
@@ -231,7 +231,7 @@ export default function HomePage() {
           <div className="flex h-40 items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-orange-500" /></div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {bestSellerData?.data.map((resto) => (
+            {bestSellerData?.data?.restaurants?.map((resto) => (
               <RestaurantCard key={resto.id} restaurant={resto} />
             ))}
           </div>
