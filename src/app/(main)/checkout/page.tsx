@@ -6,74 +6,68 @@ import { useCheckout } from "@/lib/query/order";
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/validations/checkout";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, ArrowLeft, CreditCard, ShoppingBag, MapPin, Phone, FileText } from "lucide-react";
+import { Loader2, MapPin, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth";
-import { useEffect } from "react";
+
+const PAYMENT_METHODS = [
+  { value: "bni", label: "Bank Negara Indonesia", logo: "/images/BNI.png" },
+  { value: "bri", label: "Bank Rakyat Indonesia", logo: "/images/BRI.png" },
+  { value: "bca", label: "Bank Central Asia", logo: "/images/BCA.png" },
+  { value: "mandiri", label: "Mandiri", logo: "/images/Mandiri.png" },
+];
 
 export default function CheckoutPage() {
   const { user } = useAuthStore();
   const { data: cartGroups, isLoading: isLoadingCart } = useCart();
   const { mutate: checkoutMutate, isPending: isCheckingOut } = useCheckout();
+  const [selectedPayment, setSelectedPayment] = useState("bni");
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      deliveryAddress: "",
+      deliveryAddress: "Jl Sudirman No. 25, Jakarta Pusat, 10220",
       phone: user?.phone || "",
-      paymentMethod: "cash",
+      paymentMethod: "bni",
       notes: "",
     },
   });
 
-  // Pre-fill phone if user data loads later
   useEffect(() => {
-    if (user?.phone) {
-      form.setValue("phone", user.phone);
-    }
+    if (user?.phone) form.setValue("phone", user.phone);
   }, [user, form]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("id-ID", {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
     }).format(price);
-  };
 
-  // Calculate grand total price
   const grandTotal = cartGroups
     ? cartGroups.reduce((total, group) => {
-        const groupTotal = group.items.reduce((gTotal, item) => gTotal + (item.menu?.price || 0) * item.quantity, 0);
-        return total + groupTotal;
+        return (
+          total +
+          group.items.reduce(
+            (gTotal, item) => gTotal + (item.menu?.price || 0) * item.quantity,
+            0
+          )
+        );
       }, 0)
+    : 0;
+
+  const deliveryFee = 10000;
+  const serviceFee = 1000;
+  const itemCount = cartGroups
+    ? cartGroups.reduce((c, g) => c + g.items.reduce((ci, i) => ci + i.quantity, 0), 0)
     : 0;
 
   const onSubmit = (values: CheckoutFormValues) => {
     if (!cartGroups || cartGroups.length === 0) return;
-
-    // Map checkout restaurant payload
     const formattedRestaurants = cartGroups.map((group) => ({
       restaurantId: group.restaurantId,
       items: group.items.map((item) => ({
@@ -81,241 +75,233 @@ export default function CheckoutPage() {
         quantity: item.quantity,
       })),
     }));
-
     checkoutMutate({
       restaurants: formattedRestaurants,
       deliveryAddress: values.deliveryAddress,
       phone: values.phone || undefined,
-      paymentMethod: values.paymentMethod,
+      paymentMethod: selectedPayment,
       notes: values.notes || undefined,
     });
   };
 
   return (
     <AuthGuard>
-      <div className="flex-grow bg-slate-50/30 pb-16">
-        <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
-          {/* Back button & Header */}
-          <div className="flex items-center gap-3">
-            <Link href="/cart">
-              <Button variant="ghost" size="icon" className="rounded-xl">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <div className="space-y-0.5">
-              <h1 className="text-2xl font-bold text-slate-800">Checkout Pesanan</h1>
-              <p className="text-xs text-muted-foreground">Konfirmasi alamat dan detail pembayaran pesanan Anda</p>
-            </div>
-          </div>
+      <div className="flex-grow bg-slate-50/30 pb-20">
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+          <h1 className="text-2xl font-black text-slate-900 mb-6">Checkout</h1>
 
           {isLoadingCart ? (
-            <div className="flex min-h-[40vh] items-center justify-center">
-              <Loader2 className="w-10 h-10 animate-spin text-[#C12116]" />
+            <div className="flex h-60 items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-[#C12116]" />
             </div>
           ) : cartGroups && cartGroups.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-              {/* Form Section */}
-              <div className="lg:col-span-2 space-y-6">
-                <Card className="border-border/45 bg-white p-6">
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <div className="space-y-4">
-                        <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                          <MapPin className="w-5 h-5 text-[#C12116]" />
-                          <span>Informasi Pengiriman</span>
-                        </h3>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {/* LEFT COLUMN */}
+                <div className="space-y-4">
+                  {/* Delivery Address Card */}
+                  <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-[#C12116]" />
+                      <span className="font-bold text-sm text-slate-800">
+                        Delivery Address
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-600">
+                        {form.getValues("deliveryAddress") || "Jl Sudirman No. 25, Jakarta Pusat, 10220"}
+                      </p>
+                      <p className="text-sm text-slate-500">{user?.phone || "0812-3456-7890"}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-sm font-semibold text-slate-700 border border-slate-200 rounded-full px-4 py-1.5 hover:border-slate-400 transition-colors"
+                    >
+                      Change
+                    </button>
+                  </div>
 
-                        {/* Delivery Address */}
-                        <FormField
-                          control={form.control}
-                          name="deliveryAddress"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Alamat Lengkap</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  id="checkout-deliveryAddress"
-                                  placeholder="Masukkan alamat pengiriman secara detail (jalan, nomor rumah, RT/RW, gedung/blok)"
-                                  className="min-h-[100px]"
-                                  disabled={isCheckingOut}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Phone Number */}
-                        <FormField
-                          control={form.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nomor HP Penerima (Opsional)</FormLabel>
-                              <FormControl>
-                                <div className="relative">
-                                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                  <Input
-                                    id="checkout-phone"
-                                    type="text"
-                                    placeholder="Contoh: 081234567890"
-                                    className="pl-10"
-                                    disabled={isCheckingOut}
-                                    {...field}
-                                  />
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <Separator />
-
-                      <div className="space-y-4">
-                        <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                          <CreditCard className="w-5 h-5 text-[#C12116]" />
-                          <span>Metode Pembayaran</span>
-                        </h3>
-
-                        {/* Payment Method */}
-                        <FormField
-                          control={form.control}
-                          name="paymentMethod"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Pilih Metode Pembayaran</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                disabled={isCheckingOut}
-                              >
-                                <FormControl>
-                                  <SelectTrigger id="checkout-paymentMethod">
-                                    <SelectValue placeholder="Pilih Metode Pembayaran" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="cash">💵 Tunai (COD)</SelectItem>
-                                  <SelectItem value="transfer">🏦 Transfer Bank</SelectItem>
-                                  <SelectItem value="e-wallet">📱 E-Wallet (OVO / GoPay)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <Separator />
-
-                      <div className="space-y-4">
-                        <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-[#C12116]" />
-                          <span>Catatan Tambahan (Opsional)</span>
-                        </h3>
-
-                        {/* Notes */}
-                        <FormField
-                          control={form.control}
-                          name="notes"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Catatan untuk Driver / Restoran</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  id="checkout-notes"
-                                  placeholder="Contoh: Jangan pakai sambal, atau ketuk pintu saja"
-                                  className="min-h-[80px]"
-                                  disabled={isCheckingOut}
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <Button
-                        id="checkout-submit"
-                        type="submit"
-                        className="w-full bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold h-11 text-base rounded-xl"
-                        disabled={isCheckingOut}
-                      >
-                        {isCheckingOut ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                            Sedang memproses...
-                          </>
-                        ) : (
-                          `Pesan Sekarang (${formatPrice(grandTotal)})`
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                </Card>
-              </div>
-
-              {/* Order Summary Sidebar */}
-              <div className="space-y-4">
-                <Card className="border-border/45 bg-white p-5 space-y-4">
-                  <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                    <ShoppingBag className="w-4 h-4 text-[#C12116]" />
-                    <span>Daftar Pesanan</span>
-                  </h3>
-
-                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
-                    {cartGroups.map((group) => (
-                      <div key={group.restaurantId} className="space-y-2">
-                        <div className="text-xs font-bold text-slate-800 bg-slate-50 p-2 rounded-lg truncate">
-                          {group.restaurantName}
+                  {/* Order Items per Restaurant */}
+                  {cartGroups.map((group) => (
+                    <div
+                      key={group.restaurantId}
+                      className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4"
+                    >
+                      {/* Restaurant Header */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 relative shrink-0">
+                            <Image
+                              src="/images/BurgerKing.png"
+                              alt={group.restaurantName}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                          <span className="font-bold text-sm text-slate-800">
+                            {group.restaurantName || "Burger Bang"}
+                          </span>
                         </div>
-                        <div className="space-y-2 pl-2">
-                          {group.items.map((item) => (
-                            <div key={item.id} className="flex justify-between items-start gap-4 text-xs">
-                              <span className="text-slate-600 line-clamp-2">
-                                {item.menu?.name} <span className="text-[#C12116] font-semibold">x{item.quantity}</span>
-                              </span>
-                              <span className="font-semibold text-slate-700 shrink-0">
-                                {formatPrice((item.menu?.price || 0) * item.quantity)}
-                              </span>
+                        <button
+                          type="button"
+                          className="text-sm font-semibold text-slate-600 border border-slate-200 rounded-full px-3 py-1 hover:border-slate-400 transition-colors"
+                        >
+                          Add item
+                        </button>
+                      </div>
+
+                      {/* Items */}
+                      <div className="space-y-3">
+                        {group.items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center gap-3"
+                          >
+                            <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                              <Image
+                                src="/images/DoubleBurger.png"
+                                alt={item.menu?.name || "Food"}
+                                width={64}
+                                height={64}
+                                className="object-cover w-full h-full"
+                              />
                             </div>
-                          ))}
-                        </div>
+                            <div className="flex-grow">
+                              <p className="text-sm font-semibold text-slate-700">
+                                {item.menu?.name || "Food Name"}
+                              </p>
+                              <p className="text-sm text-slate-500">
+                                {formatPrice(item.menu?.price || 0)}
+                              </p>
+                            </div>
+                            {/* Qty controls */}
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center hover:border-slate-400"
+                              >
+                                <Minus className="w-3 h-3 text-slate-600" />
+                              </button>
+                              <span className="text-sm font-bold text-slate-800 w-4 text-center">
+                                {item.quantity}
+                              </span>
+                              <button
+                                type="button"
+                                className="w-7 h-7 rounded-full bg-[#C12116] flex items-center justify-center hover:bg-[#C12116]/90"
+                              >
+                                <Plus className="w-3 h-3 text-white" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  ))}
+                </div>
+
+                {/* RIGHT COLUMN */}
+                <div className="space-y-4">
+                  {/* Payment Method */}
+                  <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-3">
+                    <h3 className="font-bold text-sm text-slate-800">
+                      Payment Method
+                    </h3>
+                    <div className="space-y-2">
+                      {PAYMENT_METHODS.map((method) => (
+                        <label
+                          key={method.value}
+                          className="flex items-center justify-between py-2.5 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-7 relative shrink-0">
+                              <Image
+                                src={method.logo}
+                                alt={method.label}
+                                fill
+                                className="object-contain"
+                              />
+                            </div>
+                            <span className="text-sm font-medium text-slate-700">
+                              {method.label}
+                            </span>
+                          </div>
+                          <div
+                            onClick={() => setSelectedPayment(method.value)}
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer ${
+                              selectedPayment === method.value
+                                ? "border-[#C12116]"
+                                : "border-slate-300"
+                            }`}
+                          >
+                            {selectedPayment === method.value && (
+                              <div className="w-2.5 h-2.5 rounded-full bg-[#C12116]" />
+                            )}
+                          </div>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
-                  <Separator />
+                  {/* Payment Summary */}
+                  <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-3">
+                    <h3 className="font-bold text-sm text-slate-800">
+                      Payment Summary
+                    </h3>
+                    <div className="space-y-2.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">
+                          Price ({itemCount} items)
+                        </span>
+                        <span className="font-semibold text-slate-800">
+                          {formatPrice(grandTotal)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Delivery Fee</span>
+                        <span className="font-semibold text-slate-800">
+                          {formatPrice(deliveryFee)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Service Fee</span>
+                        <span className="font-semibold text-slate-800">
+                          {formatPrice(serviceFee)}
+                        </span>
+                      </div>
+                      <Separator className="bg-slate-100" />
+                      <div className="flex justify-between text-sm">
+                        <span className="font-bold text-slate-800">Total</span>
+                        <span className="font-black text-slate-800">
+                          {formatPrice(serviceFee)}
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className="flex justify-between items-center text-slate-800 pt-1">
-                    <span className="text-xs text-muted-foreground">Subtotal Belanja</span>
-                    <span className="text-sm font-semibold">{formatPrice(grandTotal)}</span>
+                    {/* Buy Button */}
+                    <Button
+                      id="checkout-submit"
+                      type="submit"
+                      disabled={isCheckingOut}
+                      className="w-full bg-[#C12116] hover:bg-[#C12116]/90 text-white font-bold h-12 rounded-full mt-2"
+                    >
+                      {isCheckingOut ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        "Buy"
+                      )}
+                    </Button>
                   </div>
-
-                  <div className="flex justify-between items-center text-slate-800">
-                    <span className="text-xs text-muted-foreground">Biaya Pengiriman</span>
-                    <span className="text-sm font-semibold text-green-600">GRATIS</span>
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex justify-between items-center text-slate-800">
-                    <span className="text-sm font-bold">Total Pembayaran</span>
-                    <span className="text-base font-extrabold text-[#C12116]">{formatPrice(grandTotal)}</span>
-                  </div>
-                </Card>
+                </div>
               </div>
-            </div>
+            </form>
           ) : (
-            <div className="text-center py-16 bg-white border border-dashed rounded-3xl space-y-4">
-              <p className="text-sm text-slate-500">Keranjang Anda kosong. Tambahkan makanan terlebih dahulu.</p>
+            <div className="text-center py-20 bg-white border border-dashed rounded-2xl space-y-4">
+              <p className="text-slate-500 text-sm">
+                Keranjang Anda kosong.
+              </p>
               <Link href="/">
-                <Button className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold">
-                  Lihat Menu Restoran
+                <Button className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-bold rounded-full px-8">
+                  Lihat Menu
                 </Button>
               </Link>
             </div>

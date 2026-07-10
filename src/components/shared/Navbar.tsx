@@ -146,6 +146,12 @@ export default function Navbar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer flex items-center gap-2.5 py-2 px-3 hover:bg-slate-50">
+                      <User className="h-4 w-4 text-slate-500" />
+                      <span className="text-xs font-semibold text-slate-700">Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link href="/checkout" className="cursor-pointer flex items-center gap-2.5 py-2 px-3 hover:bg-slate-50">
                       <MapPin className="h-4 w-4 text-slate-500" />
                       <span className="text-xs font-semibold text-slate-700">Delivery Address</span>

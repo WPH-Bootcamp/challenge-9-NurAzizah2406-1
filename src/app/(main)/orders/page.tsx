@@ -1,24 +1,24 @@
 "use client";
 
 import AuthGuard from "@/components/shared/AuthGuard";
+import ProfileSidebar from "@/components/shared/ProfileSidebar";
 import { useMyOrders } from "@/lib/query/order";
 import { useCreateReview } from "@/lib/query/review";
-import { Loader2, Calendar, ShoppingBag, MessageSquare, Star, SlidersHorizontal, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { Loader2, Star, Search, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import Image from "next/image";
 
-const STATUS_FILTERS = [
-  { name: "Semua", value: "" },
-  { name: "Menunggu", value: "pending" },
-  { name: "Diproses", value: "confirmed" },
-  { name: "Selesai", value: "delivered" },
-  { name: "Dibatalkan", value: "cancelled" },
+const STATUS_TABS = [
+  { label: "Status", value: "" },
+  { label: "Preparing", value: "confirmed" },
+  { label: "On the Way", value: "on_the_way" },
+  { label: "Delivered", value: "delivered" },
+  { label: "Done", value: "done" },
+  { label: "Canceled", value: "cancelled" },
 ];
 
 export default function OrdersPage() {
@@ -26,19 +26,18 @@ export default function OrdersPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Sync state with URL search params
   const statusParam = searchParams.get("status") || "";
-  const pageParam = searchParams.get("page") || "1";
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleStatusFilter = (status: string) => {
+  const handleStatusFilter = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (status) {
-      params.set("status", status);
+    if (value) {
+      params.set("status", value);
     } else {
       params.delete("status");
     }
@@ -46,28 +45,27 @@ export default function OrdersPage() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const { data: orderResponse, isLoading, error } = useMyOrders({
+  const { data: orderResponse, isLoading } = useMyOrders({
     status: statusParam || undefined,
-    page: parseInt(pageParam),
-    limit: 10,
+    page: 1,
+    limit: 20,
   });
 
-  // Modal review state
+  // Review modal state
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
-  const [starRating, setStarRating] = useState<number>(5);
+  const [starRating, setStarRating] = useState<number>(4);
   const [reviewComment, setReviewComment] = useState<string>("");
 
   const { mutate: submitReview, isPending: isSubmittingReview } = useCreateReview();
 
-  const handleOpenReviewModal = (order: any) => {
+  const handleOpenReview = (order: any) => {
     setSelectedOrder(order);
-    // Default to the first restaurant in the order list
     if (order.restaurants && order.restaurants.length > 0) {
       setSelectedRestaurantId(order.restaurants[0].restaurantId);
     }
-    setStarRating(5);
+    setStarRating(4);
     setReviewComment("");
     setIsReviewOpen(true);
   };
@@ -75,219 +73,193 @@ export default function OrdersPage() {
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedOrder || !selectedRestaurantId) return;
-
-    submitReview({
-      transactionId: selectedOrder.id,
-      restaurantId: selectedRestaurantId,
-      star: starRating,
-      comment: reviewComment,
-    }, {
-      onSuccess: () => {
-        setIsReviewOpen(false);
-      }
-    });
+    submitReview(
+      {
+        transactionId: selectedOrder.id,
+        restaurantId: selectedRestaurantId,
+        star: starRating,
+        comment: reviewComment,
+      },
+      { onSuccess: () => setIsReviewOpen(false) }
+    );
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("id-ID", {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       maximumFractionDigits: 0,
     }).format(price);
-  };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 gap-1"><Clock className="w-3 h-3" /> Menunggu</Badge>;
-      case "confirmed":
-      case "preparing":
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1"><Clock className="w-3 h-3" /> Diproses</Badge>;
-      case "delivered":
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1"><CheckCircle2 className="w-3 h-3" /> Selesai</Badge>;
-      case "cancelled":
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1"><AlertTriangle className="w-3 h-3" /> Dibatalkan</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
+  const orders = orderResponse?.data || [];
+  const filtered = orders.filter((o: any) =>
+    o.restaurants?.some((r: any) =>
+      r.restaurantName.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
 
   return (
     <AuthGuard>
-      <div className="flex-grow bg-slate-50/30 pb-16">
-        <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
-          {/* Header */}
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-slate-800">Riwayat Pesanan</h1>
-            <p className="text-xs text-muted-foreground">Lihat status dan detail pesanan makanan Anda</p>
-          </div>
+      <div className="flex-grow bg-slate-50/30 pb-20">
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+          <div className="flex flex-col md:flex-row gap-6 items-start">
+            {/* Sidebar */}
+            <ProfileSidebar />
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-100">
-            {STATUS_FILTERS.map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() => handleStatusFilter(filter.value)}
-                className={`px-4 py-2 border-b-2 font-semibold text-sm transition-all cursor-pointer ${
-                  statusParam === filter.value
-                    ? "border-[#C12116] text-[#C12116]"
-                    : "border-transparent text-slate-500 hover:text-[#C12116]"
-                }`}
-              >
-                {filter.name}
-              </button>
-            ))}
-          </div>
+            {/* Main Content */}
+            <div className="flex-grow w-full space-y-6">
+              <h1 className="text-2xl font-black text-slate-900">My Orders</h1>
 
-          {/* Main List */}
-          {isLoading ? (
-            <div className="flex min-h-[40vh] items-center justify-center">
-              <Loader2 className="w-10 h-10 animate-spin text-[#C12116]" />
-            </div>
-          ) : error ? (
-            <div className="text-center py-12 bg-white rounded-3xl border border-dashed text-red-500">
-              Gagal memuat riwayat pesanan.
-            </div>
-          ) : orderResponse?.data && orderResponse.data.length > 0 ? (
-            <div className="space-y-6">
-              {orderResponse.data.map((order) => (
-                <Card key={order.id} className="border-border/45 bg-white overflow-hidden shadow-sm">
-                  {/* Order Card Header */}
-                  <div className="bg-slate-50/50 p-4 border-b flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-red-50 text-[#C12116] flex items-center justify-center">
-                        <ShoppingBag className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">ORDER ID</span>
-                        <span className="text-xs font-mono font-semibold text-slate-800 block truncate max-w-[150px] sm:max-w-none">
-                          {order.id}
-                        </span>
-                      </div>
-                    </div>
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-11 pl-11 pr-10 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#C12116]/20 focus:border-[#C12116]"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <span className="text-[10px] text-muted-foreground block">Tanggal Transaksi</span>
-                        <span className="text-xs text-slate-700 font-semibold flex items-center gap-1 mt-0.5 justify-end">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          {new Date(order.createdAt).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </span>
-                      </div>
-                      {getStatusBadge(order.status)}
-                    </div>
-                  </div>
+              {/* Status Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-wrap">
+                {STATUS_TABS.map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => handleStatusFilter(tab.value)}
+                    className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                      statusParam === tab.value
+                        ? "border-[#C12116] bg-white text-[#C12116]"
+                        : "border-slate-200 bg-white text-slate-500 hover:border-[#C12116] hover:text-[#C12116]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
 
-                  {/* Order Card Body */}
-                  <CardContent className="p-5 space-y-4">
-                    {order.restaurants.map((rest, rIdx) => (
-                      <div key={rest.restaurantId} className="space-y-2">
-                        {rIdx > 0 && <Separator className="my-3" />}
-                        <h4 className="font-bold text-sm text-slate-800">
-                          {rest.restaurantName}
-                        </h4>
-                        <div className="space-y-2 pl-2">
-                          {rest.items.map((item, iIdx) => (
-                            <div key={iIdx} className="flex justify-between items-start gap-4 text-xs">
-                              <span className="text-slate-600">
-                                {item.name} <span className="text-[#C12116] font-bold">x{item.quantity}</span>
-                              </span>
-                              <span className="font-semibold text-slate-700">
-                                {formatPrice(item.price * item.quantity)}
-                              </span>
+              {/* Orders List */}
+              {isLoading ? (
+                <div className="flex h-60 items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#C12116]" />
+                </div>
+              ) : filtered.length > 0 ? (
+                <div className="space-y-4">
+                  {filtered.map((order: any) => (
+                    <div
+                      key={order.id}
+                      className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4"
+                    >
+                      {order.restaurants?.map((rest: any, rIdx: number) => (
+                        <div key={rest.restaurantId}>
+                          {/* Restaurant Header */}
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 relative shrink-0">
+                              <Image
+                                src="/images/BurgerKing.png"
+                                alt={rest.restaurantName}
+                                fill
+                                className="object-contain"
+                              />
+                            </div>
+                            <span className="font-bold text-sm text-slate-800">
+                              {rest.restaurantName}
+                            </span>
+                          </div>
+
+                          {/* Items */}
+                          {rest.items?.map((item: any, iIdx: number) => (
+                            <div key={iIdx} className="flex items-center gap-3 mb-2">
+                              <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                                <Image
+                                  src="/images/DoubleBurger.png"
+                                  alt={item.name}
+                                  width={64}
+                                  height={64}
+                                  className="object-cover w-full h-full"
+                                />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-slate-700">
+                                  {item.name || "Food Name"}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {item.quantity} x {formatPrice(item.price)}
+                                </p>
+                              </div>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    ))}
+                      ))}
 
-                    <Separator className="mt-4" />
-
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-1">
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] text-muted-foreground block">Alamat Pengiriman</span>
-                        <p className="text-xs text-slate-600 line-clamp-1">{order.deliveryAddress}</p>
-                      </div>
-
-                      <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                        <div className="text-left sm:text-right">
-                          <span className="text-[10px] text-muted-foreground block">Total Transaksi</span>
-                           <span className="text-sm font-extrabold text-[#C12116]">{formatPrice(order.totalPrice)}</span>
+                      {/* Total & Action */}
+                      <div className="border-t border-slate-100 pt-4 flex items-end justify-between">
+                        <div>
+                          <p className="text-xs text-slate-400 font-medium">Total</p>
+                          <p className="text-base font-black text-slate-900">
+                            {formatPrice(order.totalPrice)}
+                          </p>
                         </div>
-
-                        {order.status === "delivered" && (
-                           <Button
-                            size="sm"
-                            onClick={() => handleOpenReviewModal(order)}
-                            className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold text-xs flex items-center gap-1.5 rounded-lg"
+                        {(order.status === "delivered" || order.status === "done") && (
+                          <Button
+                            onClick={() => handleOpenReview(order)}
+                            className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-bold text-sm rounded-full px-6 h-10"
                           >
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            <span>Beri Ulasan</span>
+                            Give Review
                           </Button>
                         )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 bg-white border border-dashed rounded-2xl">
+                  <p className="text-slate-500 text-sm">Belum ada pesanan.</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-16 bg-white border border-dashed rounded-3xl space-y-4">
-              <p className="text-sm text-slate-500">Anda belum memiliki pesanan.</p>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Review Dialog Modal */}
+      {/* Give Review Modal */}
       {mounted && selectedOrder && (
         <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-          <DialogContent className="max-w-md bg-white border">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-slate-800">Beri Ulasan Restoran</DialogTitle>
-              <DialogDescription className="text-xs">
-                Bagikan pengalaman bersantap Anda dengan yang lain
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent className="max-w-sm bg-white rounded-2xl p-6 shadow-xl border-0">
+            <div className="flex items-center justify-between mb-1">
+              <DialogTitle className="text-lg font-black text-slate-900">
+                Give Review
+              </DialogTitle>
+            </div>
 
-            <form onSubmit={handleSubmitReview} className="space-y-5">
-              {/* Select Restaurant */}
-              {selectedOrder.restaurants && selectedOrder.restaurants.length > 1 && (
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-700">Pilih Restoran</label>
-                  <select
-                    value={selectedRestaurantId}
-                    onChange={(e) => setSelectedRestaurantId(e.target.value)}
-                    className="w-full border rounded-lg p-2 text-sm"
-                    required
-                  >
-                    {selectedOrder.restaurants.map((rest: any) => (
-                      <option key={rest.restaurantId} value={rest.restaurantId}>
-                        {rest.restaurantName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Star Rating Selection */}
-              <div className="space-y-2 flex flex-col items-center justify-center py-2 bg-slate-50 rounded-2xl border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">Beri Bintang</span>
-                <div className="flex gap-1.5 mt-1">
+            <form onSubmit={handleSubmitReview} className="space-y-5 mt-3">
+              {/* Star Rating */}
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-slate-700 text-center">
+                  Give Rating
+                </p>
+                <div className="flex gap-2 justify-center">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setStarRating(star)}
-                      className="focus:outline-none transition-transform active:scale-95"
+                      className="focus:outline-none transition-transform active:scale-90"
                     >
                       <Star
-                        className={`w-8 h-8 transition-colors ${
-                          star <= starRating ? "fill-amber-400 text-amber-400" : "text-slate-300"
+                        className={`w-9 h-9 transition-colors ${
+                          star <= starRating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300 fill-slate-200"
                         }`}
                       />
                     </button>
@@ -295,36 +267,27 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              {/* Review Comment */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-700">Tulis Ulasan Anda</label>
-                <Textarea
-                  placeholder="Tulis ulasan Anda di sini..."
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  className="min-h-[100px] text-sm"
-                  required
-                />
-              </div>
+              {/* Comment */}
+              <Textarea
+                placeholder="Please share your thoughts about our service!"
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                className="min-h-[130px] text-sm rounded-xl border-slate-200 resize-none focus-visible:ring-[#C12116]"
+                required
+              />
 
-              <DialogFooter className="flex justify-end gap-2 pt-2 border-t">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsReviewOpen(false)}
-                  disabled={isSubmittingReview}
-                  className="text-xs"
-                >
-                  Batal
-                </Button>
-                 <Button
-                  type="submit"
-                  disabled={isSubmittingReview}
-                  className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold text-xs"
-                >
-                  {isSubmittingReview ? "Mengirim..." : "Kirim Ulasan"}
-                </Button>
-              </DialogFooter>
+              {/* Send Button */}
+              <Button
+                type="submit"
+                disabled={isSubmittingReview}
+                className="w-full bg-[#C12116] hover:bg-[#C12116]/90 text-white font-bold h-12 rounded-full"
+              >
+                {isSubmittingReview ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Send"
+                )}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
