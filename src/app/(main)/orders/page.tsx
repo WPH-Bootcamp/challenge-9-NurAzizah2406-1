@@ -130,8 +130,8 @@ export default function OrdersPage() {
                 onClick={() => handleStatusFilter(filter.value)}
                 className={`px-4 py-2 border-b-2 font-semibold text-sm transition-all cursor-pointer ${
                   statusParam === filter.value
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-slate-500 hover:text-orange-500"
+                    ? "border-[#C12116] text-[#C12116]"
+                    : "border-transparent text-slate-500 hover:text-[#C12116]"
                 }`}
               >
                 {filter.name}
@@ -142,7 +142,7 @@ export default function OrdersPage() {
           {/* Main List */}
           {isLoading ? (
             <div className="flex min-h-[40vh] items-center justify-center">
-              <Loader2 className="w-10 h-10 animate-spin text-orange-500" />
+              <Loader2 className="w-10 h-10 animate-spin text-[#C12116]" />
             </div>
           ) : error ? (
             <div className="text-center py-12 bg-white rounded-3xl border border-dashed text-red-500">
@@ -155,7 +155,7 @@ export default function OrdersPage() {
                   {/* Order Card Header */}
                   <div className="bg-slate-50/50 p-4 border-b flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-red-50 text-[#C12116] flex items-center justify-center">
                         <ShoppingBag className="w-5 h-5" />
                       </div>
                       <div>
@@ -194,7 +194,7 @@ export default function OrdersPage() {
                           {rest.items.map((item, iIdx) => (
                             <div key={iIdx} className="flex justify-between items-start gap-4 text-xs">
                               <span className="text-slate-600">
-                                {item.name} <span className="text-orange-500 font-bold">x{item.quantity}</span>
+                                {item.name} <span className="text-[#C12116] font-bold">x{item.quantity}</span>
                               </span>
                               <span className="font-semibold text-slate-700">
                                 {formatPrice(item.price * item.quantity)}
@@ -216,14 +216,14 @@ export default function OrdersPage() {
                       <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
                         <div className="text-left sm:text-right">
                           <span className="text-[10px] text-muted-foreground block">Total Transaksi</span>
-                          <span className="text-sm font-extrabold text-orange-600">{formatPrice(order.totalPrice)}</span>
+                           <span className="text-sm font-extrabold text-[#C12116]">{formatPrice(order.totalPrice)}</span>
                         </div>
 
                         {order.status === "delivered" && (
-                          <Button
+                           <Button
                             size="sm"
                             onClick={() => handleOpenReviewModal(order)}
-                            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs flex items-center gap-1.5 rounded-lg"
+                            className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold text-xs flex items-center gap-1.5 rounded-lg"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
                             <span>Beri Ulasan</span>
@@ -317,10 +317,10 @@ export default function OrdersPage() {
                 >
                   Batal
                 </Button>
-                <Button
+                 <Button
                   type="submit"
                   disabled={isSubmittingReview}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs"
+                  className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold text-xs"
                 >
                   {isSubmittingReview ? "Mengirim..." : "Kirim Ulasan"}
                 </Button>

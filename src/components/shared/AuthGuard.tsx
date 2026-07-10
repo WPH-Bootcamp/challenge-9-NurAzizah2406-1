@@ -23,7 +23,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!isMounted || !token) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-2">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#C12116]" />
         <p className="text-sm text-muted-foreground">Memeriksa autentikasi...</p>
       </div>
     );

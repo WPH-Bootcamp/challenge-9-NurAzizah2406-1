@@ -14,9 +14,9 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
       <Card className="overflow-hidden border border-slate-100 hover:border-red-100 hover:shadow-md transition-all duration-300 bg-white rounded-2xl p-3">
         <div className="flex items-center gap-4">
           {/* Logo / Image on Left */}
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-100 flex items-center justify-center">
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 bg-orange-100 flex items-center justify-center">
             <Image
-              src={restaurant.image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&auto=format&fit=crop&q=80"}
+              src="/images/BurgerKing.png"
               alt={restaurant.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -40,7 +40,6 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
 
             {/* Location & Distance */}
             <div className="flex items-center gap-1 text-slate-500">
-              <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0" />
               <span className="text-xs font-medium truncate">
                 {restaurant.location} &bull; {restaurant.distance ? `${restaurant.distance.toFixed(1)} km` : "2.4 km"}
               </span>

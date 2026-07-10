@@ -110,7 +110,7 @@ export default function CheckoutPage() {
 
           {isLoadingCart ? (
             <div className="flex min-h-[40vh] items-center justify-center">
-              <Loader2 className="w-10 h-10 animate-spin text-orange-500" />
+              <Loader2 className="w-10 h-10 animate-spin text-[#C12116]" />
             </div>
           ) : cartGroups && cartGroups.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -121,7 +121,7 @@ export default function CheckoutPage() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                       <div className="space-y-4">
                         <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                          <MapPin className="w-5 h-5 text-orange-500" />
+                          <MapPin className="w-5 h-5 text-[#C12116]" />
                           <span>Informasi Pengiriman</span>
                         </h3>
 
@@ -176,7 +176,7 @@ export default function CheckoutPage() {
 
                       <div className="space-y-4">
                         <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                          <CreditCard className="w-5 h-5 text-orange-500" />
+                          <CreditCard className="w-5 h-5 text-[#C12116]" />
                           <span>Metode Pembayaran</span>
                         </h3>
 
@@ -213,7 +213,7 @@ export default function CheckoutPage() {
 
                       <div className="space-y-4">
                         <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-orange-500" />
+                          <FileText className="w-5 h-5 text-[#C12116]" />
                           <span>Catatan Tambahan (Opsional)</span>
                         </h3>
 
@@ -242,7 +242,7 @@ export default function CheckoutPage() {
                       <Button
                         id="checkout-submit"
                         type="submit"
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold h-11 text-base rounded-xl"
+                        className="w-full bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold h-11 text-base rounded-xl"
                         disabled={isCheckingOut}
                       >
                         {isCheckingOut ? (
@@ -263,7 +263,7 @@ export default function CheckoutPage() {
               <div className="space-y-4">
                 <Card className="border-border/45 bg-white p-5 space-y-4">
                   <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                    <ShoppingBag className="w-4 h-4 text-orange-500" />
+                    <ShoppingBag className="w-4 h-4 text-[#C12116]" />
                     <span>Daftar Pesanan</span>
                   </h3>
 
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
                           {group.items.map((item) => (
                             <div key={item.id} className="flex justify-between items-start gap-4 text-xs">
                               <span className="text-slate-600 line-clamp-2">
-                                {item.menu?.name} <span className="text-orange-500 font-semibold">x{item.quantity}</span>
+                                {item.menu?.name} <span className="text-[#C12116] font-semibold">x{item.quantity}</span>
                               </span>
                               <span className="font-semibold text-slate-700 shrink-0">
                                 {formatPrice((item.menu?.price || 0) * item.quantity)}
@@ -305,7 +305,7 @@ export default function CheckoutPage() {
 
                   <div className="flex justify-between items-center text-slate-800">
                     <span className="text-sm font-bold">Total Pembayaran</span>
-                    <span className="text-base font-extrabold text-orange-600">{formatPrice(grandTotal)}</span>
+                    <span className="text-base font-extrabold text-[#C12116]">{formatPrice(grandTotal)}</span>
                   </div>
                 </Card>
               </div>
@@ -314,7 +314,7 @@ export default function CheckoutPage() {
             <div className="text-center py-16 bg-white border border-dashed rounded-3xl space-y-4">
               <p className="text-sm text-slate-500">Keranjang Anda kosong. Tambahkan makanan terlebih dahulu.</p>
               <Link href="/">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold">
+                <Button className="bg-[#C12116] hover:bg-[#C12116]/90 text-white font-semibold">
                   Lihat Menu Restoran
                 </Button>
               </Link>

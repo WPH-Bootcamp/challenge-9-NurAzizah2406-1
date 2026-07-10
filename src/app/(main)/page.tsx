@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import RestaurantCard from "@/components/shared/RestaurantCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, SlidersHorizontal, MapPin, X, Loader2, Award, Percent, Bike, Utensils, Coffee } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, X, Loader2, Award, Percent, Bike, Utensils, Coffee, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -21,12 +21,12 @@ import Link from "next/link";
 
 // Categories matching Figma design
 const FigCategories = [
-  { name: "All Restaurant", icon: Utensils, filter: "All" },
-  { name: "Nearby", icon: MapPin, filter: "Nearby" },
-  { name: "Discount", icon: Percent, filter: "Noodle" },
-  { name: "Best Seller", icon: Award, filter: "BestSeller" },
-  { name: "Delivery", icon: Bike, filter: "Delivery" },
-  { name: "Lunch", icon: Coffee, filter: "Rice" },
+  { name: "All Restaurant", icon: Utensils, imgSrc: "/icons/AllFood.png", filter: "All" },
+  { name: "Nearby", icon: MapPin, imgSrc: null, filter: "Nearby" },
+  { name: "Discount", icon: Percent, imgSrc: "/icons/Discount.png", filter: "Noodle" },
+  { name: "Best Seller", icon: Award, imgSrc: "/icons/BestSeller.png", filter: "BestSeller" },
+  { name: "Delivery", icon: Bike, imgSrc: "/icons/Delivery.png", filter: "Delivery" },
+  { name: "Lunch", icon: Coffee, imgSrc: "/icons/Lunch.png", filter: "Rice" },
 ];
 
 export default function HomePage() {
@@ -122,26 +122,26 @@ export default function HomePage() {
       <div className="relative h-[550px] md:h-[650px] w-full flex items-center justify-center bg-slate-900 overflow-hidden">
         {/* Cover Burger Image */}
         <Image
-          src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1600&auto=format&fit=crop&q=80"
+          src="/images/BigSizeBurger.png"
           alt="Culinary banner"
           fill
-          className="object-cover object-center opacity-45 brightness-75"
+          className="object-cover object-center opacity-80 brightness-75"
           priority
         />
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-black/40" />
+        <div className="absolute inset-0 bg-black/40" />
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-2xl px-4 text-center space-y-6">
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight">
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight drop-shadow-md">
             Explore Culinary Experiences
           </h1>
-          <p className="text-slate-200 text-sm sm:text-base max-w-md mx-auto">
+          <p className="text-slate-100 text-sm sm:text-base max-w-md mx-auto font-medium drop-shadow">
             Search and refine your choice to discover the perfect restaurant.
           </p>
 
           {/* Search Form */}
-          <form onSubmit={handleSearchSubmit} className="flex max-w-lg mx-auto bg-white rounded-full p-1.5 shadow-lg border border-slate-100 gap-2 items-center">
+          <form onSubmit={handleSearchSubmit} className="flex max-w-lg mx-auto bg-white rounded-full p-1.5 shadow-lg gap-2 items-center">
             <div className="relative flex-grow pl-3 flex items-center">
               <Search className="text-slate-400 w-5 h-5 shrink-0" />
               <Input
@@ -172,136 +172,88 @@ export default function HomePage() {
       </div>
 
       {/* Categories Grid Section */}
-      <div className="container mx-auto px-4 py-8 -mt-12 relative z-20">
-        <div className="bg-white rounded-3xl p-6 shadow-md border border-slate-100/50">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {FigCategories.map((cat) => {
-              const IconComp = cat.icon;
-              const isActive =
-                cat.filter === "All"
-                  ? !query && !rating && !priceMin && !priceMax && !location && !isNearbyActive && category === "All"
-                  : cat.filter === "Nearby"
-                  ? isNearbyActive
-                  : category === cat.filter;
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 max-w-5xl mx-auto">
+          {FigCategories.map((cat) => {
+            const IconComp = cat.icon;
+            const isActive =
+              cat.filter === "All"
+                ? !query && !rating && !priceMin && !priceMax && !location && !isNearbyActive && category === "All"
+                : cat.filter === "Nearby"
+                ? isNearbyActive
+                : category === cat.filter;
 
-              return (
-                <button
-                  key={cat.name}
-                  onClick={() => handleCategoryClick(cat)}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                    isActive
-                      ? "border-[#C12116] bg-red-50/30 shadow-xs"
-                      : "border-slate-100 bg-white hover:border-[#C12116]/40 hover:bg-slate-50/50"
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2.5 transition-colors ${
-                    isActive ? "bg-[#C12116] text-white" : "bg-red-50 text-[#C12116]"
-                  }`}>
-                    <IconComp className="w-6 h-6" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-700">{cat.name}</span>
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <button
+                key={cat.name}
+                onClick={() => handleCategoryClick(cat)}
+                className={`flex flex-col items-center justify-center gap-3 p-6 rounded-2xl transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? "bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-[#C12116]/10 scale-105"
+                    : "bg-white shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-slate-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1"
+                }`}
+              >
+                <div className="w-16 h-16 flex items-center justify-center">
+                  {cat.imgSrc ? (
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={cat.imgSrc}
+                        alt={cat.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center bg-red-50`}>
+                      <IconComp className={`w-7 h-7 text-[#C12116] fill-[#C12116]`} />
+                    </div>
+                  )}
+                </div>
+                <span className={`text-sm font-bold whitespace-nowrap ${isActive ? 'text-slate-900' : 'text-slate-700'}`}>
+                  {cat.name}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Main Lists Section */}
-      <div className="container mx-auto px-4 py-6 space-y-12 flex-grow">
-        {/* Recommended Header / See All */}
+      <div className="container mx-auto px-4 py-8 space-y-12 flex-grow mb-16 max-w-5xl">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-black text-slate-800">
+            <h2 className="text-2xl font-black text-slate-900">
               {isNearbyActive ? "Restoran Terdekat" : "Recommended"}
             </h2>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="text-slate-600 hover:text-[#C12116] hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                <span>Filter</span>
-              </Button>
-              <button
-                onClick={() => updateQueryParams({ category: "All" })}
-                className="text-[#C12116] hover:underline text-sm font-extrabold"
-              >
-                See All
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                if (isNearbyActive) updateQueryParams({ nearby: null });
+                else updateQueryParams({ category: "All" });
+              }}
+              className="text-[#C12116] hover:underline text-sm font-extrabold"
+            >
+              See All
+            </button>
           </div>
 
-          {/* Filters Bar */}
-          {showFilters && (
-            <div className="bg-white border border-slate-100 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
-              {/* Rating Filter */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600">Rating Minimum</label>
-                <Select value={rating} onValueChange={(val) => updateQueryParams({ rating: val === "none" ? null : val })}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Pilih Rating" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="none">Semua Rating</SelectItem>
-                    <SelectItem value="4.5">⭐ 4.5 ke atas</SelectItem>
-                    <SelectItem value="4.0">⭐ 4.0 ke atas</SelectItem>
-                    <SelectItem value="3.5">⭐ 3.5 ke atas</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Location Filter */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600">Lokasi / Kota</label>
-                <Input
-                  type="text"
-                  placeholder="Contoh: Jakarta"
-                  value={location}
-                  onChange={(e) => updateQueryParams({ location: e.target.value })}
-                />
-              </div>
-
-              {/* Price Filter */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600">Rentang Harga Maksimal</label>
-                <Select value={priceMax} onValueChange={(val) => updateQueryParams({ priceMax: val === "none" ? null : val })}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Pilih Harga Maks" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="none">Semua Harga</SelectItem>
-                    <SelectItem value="50000">Di bawah Rp 50.000</SelectItem>
-                    <SelectItem value="100000">Di bawah Rp 100.000</SelectItem>
-                    <SelectItem value="200000">Di bawah Rp 200.000</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
-          {/* Restaurant Grid */}
           {isLoadingList ? (
             <div className="flex h-60 items-center justify-center">
               <Loader2 className="w-8 h-8 animate-spin text-[#C12116]" />
             </div>
           ) : filteredRestaurants.length > 0 ? (
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="space-y-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {filteredRestaurants.slice(0, limitToShow).map((resto) => (
                   <RestaurantCard key={resto.id} restaurant={resto} />
                 ))}
               </div>
 
-              {/* Show More Button */}
               {filteredRestaurants.length > limitToShow && (
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center">
                   <Button
                     variant="outline"
-                    onClick={() => setLimitToShow((prev) => prev + 6)}
-                    className="border-slate-200 hover:border-[#C12116] hover:text-[#C12116] rounded-full px-8 py-2 font-bold text-sm cursor-pointer"
+                    onClick={() => setLimitToShow((prev) => prev + 4)}
+                    className="border border-slate-300 text-slate-700 hover:border-[#C12116] hover:text-[#C12116] hover:bg-white rounded-full px-8 h-10 font-bold text-sm cursor-pointer shadow-sm bg-white"
                   >
                     Show More
                   </Button>
@@ -312,7 +264,7 @@ export default function HomePage() {
             <div className="text-center py-16 bg-white border border-dashed rounded-3xl space-y-4">
               <p className="text-slate-500 text-sm">Tidak menemukan restoran yang sesuai.</p>
               <Button variant="outline" size="sm" onClick={handleResetFilters} className="rounded-full">
-                Reset Semua Filter
+                Reset Pencarian
               </Button>
             </div>
           )}
@@ -327,11 +279,7 @@ export default function HomePage() {
             {/* Brand column */}
             <div className="space-y-4 col-span-1 md:col-span-2">
               <div className="flex items-center gap-2">
-                <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="18" cy="18" r="18" fill="#C12116" />
-                  <circle cx="18" cy="18" r="5" fill="none" stroke="white" strokeWidth="2.5" />
-                  <path d="M18 2V8M18 28V34M2 18H8M28 18H34" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                </svg>
+                <Image src="/icons/Logo.png" alt="Foody Logo" width={32} height={32} className="object-contain" />
                 <span className="font-black text-xl tracking-tight text-white">Foody</span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed max-w-sm">

@@ -34,7 +34,7 @@ export default function RestaurantDetailPage() {
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[50vh] gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-orange-500" />
+        <Loader2 className="w-10 h-10 animate-spin text-[#C12116]" />
         <p className="text-slate-500 text-sm">Memuat detail restoran...</p>
       </div>
     );
@@ -83,187 +83,197 @@ export default function RestaurantDetailPage() {
   };
 
   return (
-    <div className="flex-grow bg-slate-50/30 pb-16">
-      {/* Header Cover Banner */}
-      <div className="relative h-64 md:h-80 w-full overflow-hidden bg-slate-200">
-        <Image
-          src={restaurant.image || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&auto=format&fit=crop&q=80"}
-          alt={restaurant.name}
-          fill
-          className="object-cover brightness-75"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="absolute top-4 left-4 bg-white/20 backdrop-blur-xs text-white hover:bg-white/40 hover:text-white rounded-xl"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1.5" /> Kembali
-        </Button>
+    <div className="flex-grow bg-white pb-32">
+      {/* Top Image Gallery */}
+      <div className="container mx-auto px-4 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[300px] md:h-[400px]">
+          {/* Main big image */}
+          <div className="relative w-full h-full rounded-2xl overflow-hidden">
+            <Image
+              src="/images/BigBurger.png"
+              alt="Main Burger"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+          {/* 3 smaller images */}
+          <div className="hidden md:flex flex-col gap-4 h-full">
+            <div className="relative w-full h-1/2 rounded-2xl overflow-hidden">
+              <Image src="/images/BeefBurger.png" alt="Beef Burger" fill className="object-cover" />
+            </div>
+            <div className="flex gap-4 h-1/2">
+              <div className="relative w-1/2 h-full rounded-2xl overflow-hidden">
+                <Image src="/images/DoubleBurger.png" alt="Double Burger" fill className="object-cover" />
+              </div>
+              <div className="relative w-1/2 h-full rounded-2xl overflow-hidden">
+                <Image src="/images/BurgerBiasa.png" alt="Burger Biasa" fill className="object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Info Container */}
-      <div className="container mx-auto px-4 -mt-16 relative z-10">
-        <div className="bg-white rounded-3xl p-6 shadow-md border border-border/30 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-orange-100 text-orange-700 font-semibold border-none hover:bg-orange-100">
-                  {restaurant.category}
-                </Badge>
-                <div className="flex items-center gap-1 text-sm font-bold text-amber-500">
-                  <Star className="w-4 h-4 fill-current" />
-                  <span>{restaurant.rating != null ? restaurant.rating.toFixed(1) : "N/A"}</span>
-                </div>
+      {/* Resto Info */}
+      <div className="container mx-auto px-4 mt-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+              <Image src="/images/BurgerKing.png" alt="Burger King" fill className="object-cover" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold text-slate-900">Burger King</h1>
+              <div className="flex items-center gap-1 mt-1">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <span className="text-sm font-bold text-slate-800">4.9</span>
               </div>
-              <h1 className="text-2xl md:text-4xl font-extrabold text-slate-800 tracking-tight">
-                {restaurant.name}
-              </h1>
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-red-500 shrink-0" />
-                <span>{restaurant.address || restaurant.location}</span>
+              <p className="text-sm text-slate-500 mt-1">
+                Jakarta Selatan &bull; 2.4 km
               </p>
             </div>
-            <div className="text-left md:text-right bg-slate-50 p-4 rounded-2xl border w-full md:w-auto">
-              <span className="text-xs text-muted-foreground block">Estimasi Harga</span>
-              <span className="text-lg font-extrabold text-orange-600 block mt-0.5">
-                {formatPrice(restaurant.priceMin)} - {formatPrice(restaurant.priceMax)}
-              </span>
-            </div>
           </div>
+          <Button variant="outline" className="rounded-full px-6 flex items-center gap-2 border-slate-200">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            Share
+          </Button>
+        </div>
+        <Separator className="my-8" />
+      </div>
 
-          <Separator />
-
-          <div>
-            <h2 className="font-bold text-lg text-slate-800 mb-2">Tentang Restoran</h2>
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl">
-              {restaurant.description || "Selamat datang di restoran kami. Kami menyajikan berbagai menu makanan lezat dengan bahan berkualitas terbaik. Silakan pilih menu favorit Anda di bawah."}
-            </p>
-          </div>
+      {/* Menu Section */}
+      <div className="container mx-auto px-4">
+        <h2 className="text-2xl font-extrabold text-slate-900 mb-6">Menu</h2>
+        
+        {/* Menu Tabs */}
+        <div className="flex gap-3 mb-8">
+          <Button variant="outline" className="rounded-full border-[#C12116] text-[#C12116] bg-red-50 px-6">
+            All Menu
+          </Button>
+          <Button variant="outline" className="rounded-full border-slate-200 text-slate-600 px-6">
+            Food
+          </Button>
+          <Button variant="outline" className="rounded-full border-slate-200 text-slate-600 px-6">
+            Drink
+          </Button>
         </div>
 
-        {/* Menus and Reviews Tab Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 items-start">
-          {/* Menus List (2/3 width) */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="font-bold text-xl text-slate-800 flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-orange-500" />
-              <span>Daftar Menu Makanan</span>
-            </h2>
-
-            {restaurant.menus && restaurant.menus.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {restaurant.menus.map((menu) => (
-                  <Card key={menu.id} className="overflow-hidden border-border/40 bg-white">
-                    <div className="flex gap-4 p-4 h-full">
-                      {/* Menu Image */}
-                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                        <Image
-                          src={menu.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&auto=format&fit=crop&q=60"}
-                          alt={menu.name}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 80px, 96px"
-                        />
-                      </div>
-
-                      {/* Menu Info */}
-                      <div className="flex-grow flex flex-col justify-between">
-                        <div>
-                          <h4 className="font-bold text-sm sm:text-base text-slate-800 line-clamp-1">
-                            {menu.name}
-                          </h4>
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                            {menu.description || "Menu lezat dan nikmat siap dinikmati."}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-50">
-                          <span className="text-sm font-extrabold text-orange-600">
-                            {formatPrice(menu.price)}
-                          </span>
-
-                          <div className="flex items-center gap-3">
-                            {/* Quantity Controls */}
-                            <div className="flex items-center border border-border/80 rounded-lg p-0.5 bg-slate-50">
-                              <button
-                                onClick={() => handleQuantityChange(menu.id, -1)}
-                                className="w-6 h-6 flex items-center justify-center text-slate-600 hover:text-orange-500 hover:bg-white rounded-md transition-colors"
-                              >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-                              <span className="w-6 text-center text-xs font-bold text-slate-800">
-                                {quantities[menu.id] || 1}
-                              </span>
-                              <button
-                                onClick={() => handleQuantityChange(menu.id, 1)}
-                                className="w-6 h-6 flex items-center justify-center text-slate-600 hover:text-orange-500 hover:bg-white rounded-md transition-colors"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-
-                            {/* Add Button */}
-                            <Button
-                              onClick={() => handleAddToCart(menu)}
-                              className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg h-7 px-3 text-xs font-semibold"
-                            >
-                              Tambah
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <p className="text-slate-500 text-sm">Tidak ada menu yang tersedia.</p>
-            )}
-          </div>
-
-          {/* Reviews List (1/3 width) */}
-          <div className="space-y-6">
-            <h2 className="font-bold text-xl text-slate-800 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-orange-500" />
-              <span>Ulasan Pembeli</span>
-            </h2>
-
-            <Card className="bg-white border-border/40 p-4 space-y-4">
-              {restaurant.reviews && restaurant.reviews.length > 0 ? (
-                <div className="space-y-4 max-h-[450px] overflow-y-auto pr-1">
-                  {restaurant.reviews.map((review) => (
-                    <div key={review.id} className="space-y-1.5 p-3 rounded-xl bg-slate-50/50 border border-slate-100">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-slate-700">
-                          {review.user?.name || "Pelanggan"}
-                        </span>
-                        <div className="flex items-center gap-0.5 text-xs text-amber-500 font-bold">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          <span>{review.star}</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-600 leading-relaxed italic">
-                        &ldquo;{review.comment}&rdquo;
-                      </p>
-                      <span className="text-[10px] text-muted-foreground block text-right">
-                        {new Date(review.createdAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
-                  ))}
+        {/* Menu Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { id: '1', name: 'Food Name', price: 50000, img: '/images/BigBurger.png' },
+            { id: '2', name: 'Food Name', price: 50000, img: '/images/Spaghetti.png' },
+            { id: '3', name: 'Food Name', price: 50000, img: '/images/FrenchFries.png' },
+            { id: '4', name: 'Food Name', price: 50000, img: '/images/Pizza.png' },
+            { id: '5', name: 'Food Name', price: 50000, img: '/images/BeefBurger.png' },
+            { id: '6', name: 'Food Name', price: 50000, img: '/images/CocaCola.png' },
+            { id: '7', name: 'Food Name', price: 50000, img: '/images/IceCream.png' },
+            { id: '8', name: 'Food Name', price: 50000, img: '/images/Hotdog.png' },
+          ].map((item) => {
+            const qty = quantities[item.id] || 0;
+            return (
+              <div key={item.id} className="flex flex-col rounded-2xl border border-slate-100 bg-white overflow-hidden shadow-sm">
+                <div className="relative w-full aspect-square bg-slate-900">
+                  <Image src={item.img} alt={item.name} fill className="object-cover" />
                 </div>
-              ) : (
-                <p className="text-slate-400 text-xs py-6 text-center">Belum ada ulasan untuk restoran ini.</p>
-              )}
-            </Card>
-          </div>
+                <div className="p-4 flex flex-col gap-2">
+                  <h4 className="font-bold text-sm text-slate-700">{item.name}</h4>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="font-extrabold text-slate-900">{formatPrice(item.price)}</span>
+                    {qty > 0 ? (
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => handleQuantityChange(item.id, -1)} className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center bg-white shadow-xs hover:bg-slate-50">
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="font-bold text-sm w-2 text-center">{qty}</span>
+                        <button onClick={() => handleQuantityChange(item.id, 1)} className="w-7 h-7 rounded-full bg-[#C12116] text-white flex items-center justify-center shadow-xs hover:bg-[#C12116]/90">
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <Button onClick={() => handleQuantityChange(item.id, 1)} className="bg-[#C12116] hover:bg-[#C12116]/90 text-white rounded-full px-6 h-8 text-xs font-bold">
+                        Add
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Show More Menu Button */}
+        <div className="flex justify-center mt-8">
+          <Button variant="outline" className="rounded-full px-8 border-slate-200 text-slate-700">
+            Show More
+          </Button>
         </div>
       </div>
+
+      <Separator className="my-12" />
+
+      {/* Review Section */}
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Review</h2>
+        <div className="flex items-center gap-2 mb-8">
+          <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+          <span className="font-bold text-lg text-slate-900">4.9 (24 Ulasan)</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            { name: "Michael Brown", date: "25 August 2025, 13:38", text: "What a fantastic place! The food was delicious, and the ambiance was delightful. A must-visit for anyone looking for a great time!" },
+            { name: "Sarah Davis", date: "25 August 2025, 13:38", text: "I can't say enough good things! The service was exceptional, and the menu had so many great options. Definitely a five-star experience!" },
+            { name: "David Wilson", date: "25 August 2025, 13:38", text: "This place exceeded my expectations! The staff were welcoming, and the vibe was just right. I'll be returning soon!" },
+            { name: "Emily Johnson", date: "25 August 2025, 13:38", text: "Absolutely loved my visit! The staff were friendly and attentive, making sure everything was just right. Can't wait to come back!" },
+            { name: "Jessica Taylor", date: "25 August 2025, 13:38", text: "A wonderful experience overall! The food was exquisite, and the service was impeccable. Highly recommend for a special night out!" },
+            { name: "Alex Smith", date: "25 August 2025, 13:38", text: "I had an amazing experience! The service was top-notch, and the atmosphere was perfect for a relaxing evening. Highly recommend!" },
+          ].map((rev, i) => (
+            <div key={i} className="bg-white border border-slate-100 rounded-2xl p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-200">
+                  <Image src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80" alt="Avatar" width={48} height={48} className="object-cover" />
+                </div>
+                <div>
+                  <h5 className="font-bold text-slate-900 text-sm">{rev.name}</h5>
+                  <span className="text-xs text-slate-500">{rev.date}</span>
+                </div>
+              </div>
+              <div className="flex gap-1 mb-3">
+                {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
+              </div>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {rev.text}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-center mt-8">
+          <Button variant="outline" className="rounded-full px-8 border-slate-200 text-slate-700">
+            Show More
+          </Button>
+        </div>
+      </div>
+
+      {/* Sticky Bottom Cart (when items exist) */}
+      {Object.values(quantities).reduce((a, b) => a + b, 0) > 0 && (
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 shadow-[0_-10px_30px_rgb(0,0,0,0.05)] z-50 p-4">
+          <div className="container mx-auto max-w-5xl flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-slate-600 mb-1">
+                <ShoppingBag className="w-4 h-4" />
+                <span className="font-bold text-sm">{Object.values(quantities).reduce((a, b) => a + b, 0)} Items</span>
+              </div>
+              <div className="font-black text-xl text-slate-900">
+                {formatPrice(Object.entries(quantities).reduce((total, [id, qty]) => total + (qty * 50000), 0))}
+              </div>
+            </div>
+            <Button onClick={() => router.push('/cart')} className="bg-[#C12116] hover:bg-[#C12116]/90 text-white rounded-full px-12 h-12 font-bold shadow-md">
+              Checkout
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
